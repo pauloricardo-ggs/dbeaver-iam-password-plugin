@@ -5,6 +5,6 @@
       MVP intentionally avoids DBeaver internal Secret Provider APIs.
       The plugin contributes an OSGi bundle containing a JDBC wrapper driver.
       In DBeaver, create a custom PostgreSQL driver using:
-      br.com.ma9.dbeaver.aws.rds.iam.driver.AwsRdsIamPostgresDriver
+      dev.pauloricardo.dbeaver.aws.rds.iam.driver.AwsRdsIamPostgresDriver
     -->
 </plugin>

@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>br.com.ma9.dbeaver</groupId>
+        <groupId>dev.pauloricardo.dbeaver</groupId>
         <artifactId>dbeaver-aws-rds-iam-auth-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
-    <artifactId>br.com.ma9.dbeaver.aws.rds.iam.repository</artifactId>
+    <artifactId>dev.pauloricardo.dbeaver.aws.rds.iam.repository</artifactId>
     <packaging>eclipse-repository</packaging>
 
     <build>

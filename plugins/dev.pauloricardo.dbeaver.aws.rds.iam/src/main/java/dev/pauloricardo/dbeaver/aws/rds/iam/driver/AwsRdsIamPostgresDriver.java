@@ -1,4 +1,4 @@
-package br.com.ma9.dbeaver.aws.rds.iam.driver;
+package dev.pauloricardo.dbeaver.aws.rds.iam.driver;
 
 import java.sql.Connection;
 import java.sql.Driver;
@@ -13,13 +13,13 @@ import java.util.logging.Logger;
  * JDBC wrapper for PostgreSQL connections that need AWS RDS IAM authentication.
  *
  * Supported URL:
- * jdbc:ma9awsrds:postgresql://host:5432/database?sslmode=require&awsRegion=us-east-1&awsProfile=default
+ * jdbc:awsrdsiam:postgresql://host:5432/database?sslmode=require&awsRegion=us-east-1&awsProfile=default
  *
  * The wrapper generates a fresh AWS RDS IAM auth token and delegates the real
  * connection to org.postgresql.Driver.
  */
 public final class AwsRdsIamPostgresDriver implements Driver {
-    public static final String URL_PREFIX = "jdbc:ma9awsrds:postgresql:";
+    public static final String URL_PREFIX = "jdbc:awsrdsiam:postgresql:";
     public static final String POSTGRES_URL_PREFIX = "jdbc:postgresql:";
 
     static {

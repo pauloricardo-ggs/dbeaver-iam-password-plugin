@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature
+         url="features/dev.pauloricardo.dbeaver.aws.rds.iam.feature_0.1.0.qualifier.jar"
+         id="dev.pauloricardo.dbeaver.aws.rds.iam.feature"
+         version="0.1.0.qualifier">
+      <category name="dev.pauloricardo.dbeaver"/>
+   </feature>
+   <category-def name="dev.pauloricardo.dbeaver" label="pauloricardo.dev DBeaver Extensions"/>
+</site>

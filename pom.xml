@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>br.com.ma9.dbeaver</groupId>
+    <groupId>dev.pauloricardo.dbeaver</groupId>
     <artifactId>dbeaver-aws-rds-iam-auth-parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -16,9 +16,9 @@
     </properties>
 
     <modules>
-        <module>plugins/br.com.ma9.dbeaver.aws.rds.iam</module>
-        <module>features/br.com.ma9.dbeaver.aws.rds.iam.feature</module>
-        <module>releng/br.com.ma9.dbeaver.aws.rds.iam.repository</module>
+        <module>plugins/dev.pauloricardo.dbeaver.aws.rds.iam</module>
+        <module>features/dev.pauloricardo.dbeaver.aws.rds.iam.feature</module>
+        <module>releng/dev.pauloricardo.dbeaver.aws.rds.iam.repository</module>
     </modules>
 
     <repositories>

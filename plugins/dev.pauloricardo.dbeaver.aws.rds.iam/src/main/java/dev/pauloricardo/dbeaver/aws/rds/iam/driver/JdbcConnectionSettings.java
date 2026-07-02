@@ -1,4 +1,4 @@
-package br.com.ma9.dbeaver.aws.rds.iam.driver;
+package dev.pauloricardo.dbeaver.aws.rds.iam.driver;
 
 import java.net.URI;
 import java.net.URISyntaxException;

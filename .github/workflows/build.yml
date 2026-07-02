@@ -45,7 +45,7 @@ jobs:
 
       - name: Package update site
         run: |
-          REPOSITORY_DIR="releng/br.com.ma9.dbeaver.aws.rds.iam.repository/target/repository"
+          REPOSITORY_DIR="releng/dev.pauloricardo.dbeaver.aws.rds.iam.repository/target/repository"
           touch "${REPOSITORY_DIR}/.nojekyll"
           cd "${REPOSITORY_DIR}"
           zip -r ../../../../dbeaver-aws-rds-iam-auth-update-site.zip .
@@ -69,5 +69,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: releng/br.com.ma9.dbeaver.aws.rds.iam.repository/target/repository
+          publish_dir: releng/dev.pauloricardo.dbeaver.aws.rds.iam.repository/target/repository
           force_orphan: true
