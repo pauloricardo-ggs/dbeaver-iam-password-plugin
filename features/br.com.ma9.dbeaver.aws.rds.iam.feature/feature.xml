@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="br.com.ma9.dbeaver.aws.rds.iam.feature"
+      label="MA9 DBeaver AWS RDS IAM Auth"
+      version="0.1.0.qualifier"
+      provider-name="MA9">
+
+   <description>
+      JDBC wrapper driver for AWS RDS IAM authentication in DBeaver.
+   </description>
+
+   <copyright>
+      Copyright (c) 2026 MA9.
+   </copyright>
+
+   <license url="https://opensource.org/licenses/MIT">
+      MIT License
+   </license>
+
+   <plugin
+         id="br.com.ma9.dbeaver.aws.rds.iam"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+</feature>

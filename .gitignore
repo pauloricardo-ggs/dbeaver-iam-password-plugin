@@ -1,0 +1,12 @@
+target/
+.m2/
+*.class
+*.jar
+*.zip
+.DS_Store
+.project
+.classpath
+.settings/
+.metadata/
+.idea/
+*.iml
