@@ -20,7 +20,7 @@ final class AwsCliTokenGenerator {
     };
 
     String generate(JdbcConnectionSettings settings) throws SQLException {
-        List<String> command = command(settings.awsCliPath(), settings);
+        List<String> command = tokenCommand(settings.awsCliPath(), settings);
 
         if (settings.debug()) {
             System.err.println("[dbeaver-aws-rds-iam-auth] Generating token for "
@@ -41,7 +41,7 @@ final class AwsCliTokenGenerator {
                 if (!new File(fallbackPath).canExecute()) {
                     continue;
                 }
-                List<String> fallbackCommand = command(fallbackPath, settings);
+                List<String> fallbackCommand = tokenCommand(fallbackPath, settings);
                 try {
                     return execute(fallbackCommand, settings);
                 } catch (IOException fallbackException) {
@@ -54,7 +54,7 @@ final class AwsCliTokenGenerator {
         }
     }
 
-    private static List<String> command(String awsCliPath, JdbcConnectionSettings settings) {
+    private static List<String> tokenCommand(String awsCliPath, JdbcConnectionSettings settings) {
         List<String> command = new ArrayList<>();
         command.add(awsCliPath);
         command.add("rds");

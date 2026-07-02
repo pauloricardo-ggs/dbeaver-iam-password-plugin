@@ -17,6 +17,7 @@ public final class AwsRdsIamAuthModelConfigurator
     private Text awsCliPathText;
     private Text awsProfileText;
     private Text awsRegionText;
+    private Text awsSessionRoleText;
 
     @Override
     public void createControl(
@@ -28,6 +29,7 @@ public final class AwsRdsIamAuthModelConfigurator
         awsCliPathText = createField(authPanel, "AWS CLI Path", propertyChangeListener);
         awsProfileText = createField(authPanel, "AWS Profile", propertyChangeListener);
         awsRegionText = createField(authPanel, "AWS Region", propertyChangeListener);
+        awsSessionRoleText = createField(authPanel, "Session Role", propertyChangeListener);
     }
 
     @Override
@@ -49,6 +51,13 @@ public final class AwsRdsIamAuthModelConfigurator
                 configuration.getProperty(AwsRdsIamAuthCredentials.PROP_AWS_REGION),
                 AwsRdsIamAuthCredentials.DEFAULT_AWS_REGION
         ));
+        awsSessionRoleText.setText(firstNonBlank(
+                configuration.getAuthProperty(AwsRdsIamAuthCredentials.PROP_SESSION_ROLE),
+                configuration.getProperty(AwsRdsIamAuthCredentials.PROP_SESSION_ROLE),
+                configuration.getAuthProperty(AwsRdsIamAuthCredentials.PROP_LEGACY_AWS_SESSION_ROLE),
+                configuration.getProperty(AwsRdsIamAuthCredentials.PROP_LEGACY_AWS_SESSION_ROLE),
+                AwsRdsIamAuthCredentials.DEFAULT_SESSION_ROLE
+        ));
     }
 
     @Override
@@ -68,6 +77,10 @@ public final class AwsRdsIamAuthModelConfigurator
                 awsRegionText,
                 AwsRdsIamAuthCredentials.DEFAULT_AWS_REGION
         ));
+        configuration.setAuthProperty(
+                AwsRdsIamAuthCredentials.PROP_SESSION_ROLE,
+                trim(awsSessionRoleText)
+        );
         dataSource.setSavePassword(true);
     }
 

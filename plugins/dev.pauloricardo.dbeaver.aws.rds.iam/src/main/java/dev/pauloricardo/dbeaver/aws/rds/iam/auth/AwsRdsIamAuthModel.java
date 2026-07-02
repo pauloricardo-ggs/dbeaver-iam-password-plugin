@@ -40,6 +40,13 @@ public final class AwsRdsIamAuthModel extends AuthModelDatabaseNative<AwsRdsIamA
                 configuration.getProperty(AwsRdsIamAuthCredentials.PROP_AWS_CLI_PATH),
                 AwsRdsIamAuthCredentials.DEFAULT_AWS_CLI_PATH
         ));
+        credentials.setSessionRole(firstNonBlank(
+            configuration.getAuthProperty(AwsRdsIamAuthCredentials.PROP_SESSION_ROLE),
+            configuration.getProperty(AwsRdsIamAuthCredentials.PROP_SESSION_ROLE),
+            configuration.getAuthProperty(AwsRdsIamAuthCredentials.PROP_LEGACY_AWS_SESSION_ROLE),
+            configuration.getProperty(AwsRdsIamAuthCredentials.PROP_LEGACY_AWS_SESSION_ROLE),
+            AwsRdsIamAuthCredentials.DEFAULT_SESSION_ROLE
+        ));
         return credentials;
     }
 
@@ -54,6 +61,7 @@ public final class AwsRdsIamAuthModel extends AuthModelDatabaseNative<AwsRdsIamA
         configuration.setAuthProperty(AwsRdsIamAuthCredentials.PROP_AWS_REGION, credentials.getAwsRegion());
         configuration.setAuthProperty(AwsRdsIamAuthCredentials.PROP_AWS_PROFILE, credentials.getAwsProfile());
         configuration.setAuthProperty(AwsRdsIamAuthCredentials.PROP_AWS_CLI_PATH, credentials.getAwsCliPath());
+        configuration.setAuthProperty(AwsRdsIamAuthCredentials.PROP_SESSION_ROLE, credentials.getSessionRole());
     }
 
     @Override
@@ -70,6 +78,9 @@ public final class AwsRdsIamAuthModel extends AuthModelDatabaseNative<AwsRdsIamA
         connectProps.put(AwsRdsIamAuthCredentials.PROP_AWS_REGION, credentials.getAwsRegion());
         connectProps.put(AwsRdsIamAuthCredentials.PROP_AWS_PROFILE, credentials.getAwsProfile());
         connectProps.put(AwsRdsIamAuthCredentials.PROP_AWS_CLI_PATH, credentials.getAwsCliPath());
+        if (!isBlank(credentials.getSessionRole())) {
+            connectProps.put(AwsRdsIamAuthCredentials.PROP_SESSION_ROLE, credentials.getSessionRole());
+        }
     }
 
     @Override

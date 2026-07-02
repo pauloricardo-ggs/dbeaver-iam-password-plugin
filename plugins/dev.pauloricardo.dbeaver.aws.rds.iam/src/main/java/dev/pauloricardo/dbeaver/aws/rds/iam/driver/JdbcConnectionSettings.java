@@ -13,6 +13,7 @@ final class JdbcConnectionSettings {
     static final String DEFAULT_REGION = "us-east-1";
     static final String DEFAULT_PROFILE = "default";
     static final String DEFAULT_AWS_CLI_PATH = "aws";
+    static final String DEFAULT_SESSION_ROLE = "";
 
     private final String hostname;
     private final int port;
@@ -20,6 +21,7 @@ final class JdbcConnectionSettings {
     private final String region;
     private final String profile;
     private final String awsCliPath;
+    private final String sessionRole;
     private final boolean debug;
 
     private JdbcConnectionSettings(
@@ -29,6 +31,7 @@ final class JdbcConnectionSettings {
             String region,
             String profile,
             String awsCliPath,
+            String sessionRole,
             boolean debug
     ) {
         this.hostname = hostname;
@@ -37,6 +40,7 @@ final class JdbcConnectionSettings {
         this.region = region;
         this.profile = profile;
         this.awsCliPath = awsCliPath;
+        this.sessionRole = sessionRole;
         this.debug = debug;
     }
 
@@ -57,6 +61,13 @@ final class JdbcConnectionSettings {
         String region = firstNonBlank(properties.getProperty("awsRegion"), queryParams.get("awsRegion"), DEFAULT_REGION);
         String profile = firstNonBlank(properties.getProperty("awsProfile"), queryParams.get("awsProfile"), DEFAULT_PROFILE);
         String awsCliPath = firstNonBlank(properties.getProperty("awsCliPath"), queryParams.get("awsCliPath"), DEFAULT_AWS_CLI_PATH);
+        String sessionRole = firstNonBlank(
+                properties.getProperty("sessionRole"),
+                queryParams.get("sessionRole"),
+                properties.getProperty("awsSessionRole"),
+                queryParams.get("awsSessionRole"),
+                DEFAULT_SESSION_ROLE
+        );
         String debugValue = firstNonBlank(properties.getProperty("awsRdsIamDebug"), queryParams.get("awsRdsIamDebug"), "false");
 
         return new JdbcConnectionSettings(
@@ -66,6 +77,7 @@ final class JdbcConnectionSettings {
                 region,
                 profile,
                 awsCliPath,
+                sessionRole,
                 Boolean.parseBoolean(debugValue)
         );
     }
@@ -92,6 +104,10 @@ final class JdbcConnectionSettings {
 
     String awsCliPath() {
         return awsCliPath;
+    }
+
+    String sessionRole() {
+        return sessionRole;
     }
 
     boolean debug() {

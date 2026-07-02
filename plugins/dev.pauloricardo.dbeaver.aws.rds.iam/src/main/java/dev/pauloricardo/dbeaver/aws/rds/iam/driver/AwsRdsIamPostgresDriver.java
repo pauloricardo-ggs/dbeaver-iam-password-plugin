@@ -47,6 +47,12 @@ public final class AwsRdsIamPostgresDriver implements Driver {
 
         connectionProperties.setProperty("password", token);
         connectionProperties.setProperty("sslmode", connectionProperties.getProperty("sslmode", "require"));
+        if (!settings.sessionRole().isBlank()) {
+            connectionProperties.setProperty(
+                "options",
+                appendSessionRoleOption(connectionProperties.getProperty("options"), settings.sessionRole())
+            );
+        }
 
         return loadPostgresDriver(postgresUrl).connect(postgresUrl, connectionProperties);
     }
@@ -63,6 +69,7 @@ public final class AwsRdsIamPostgresDriver implements Driver {
                 property("awsRegion", false, "AWS region. Default: us-east-1"),
                 property("awsProfile", false, "AWS CLI profile. Default: default"),
                 property("awsCliPath", false, "AWS CLI binary path. Default: aws"),
+                property("sessionRole", false, "Optional PostgreSQL role to apply as options=-c role=<role>"),
                 property("awsRdsIamDebug", false, "Print token generation diagnostics without token value")
         };
     }
@@ -96,6 +103,14 @@ public final class AwsRdsIamPostgresDriver implements Driver {
 
     private static String toPostgresUrl(String url) {
         return POSTGRES_URL_PREFIX + url.substring(URL_PREFIX.length());
+    }
+
+    private static String appendSessionRoleOption(String existingOptions, String sessionRole) {
+        String roleOption = "-c role=" + sessionRole;
+        if (existingOptions == null || existingOptions.isBlank()) {
+            return roleOption;
+        }
+        return existingOptions + " " + roleOption;
     }
 
     private static Driver loadPostgresDriver(String postgresUrl) throws SQLException {
