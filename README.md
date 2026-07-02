@@ -99,7 +99,7 @@ token for every new JDBC connection.
 
 Requirements:
 
-- Java 17+
+- Java 21+
 - Maven 3.9+
 - AWS CLI installed for runtime use
 

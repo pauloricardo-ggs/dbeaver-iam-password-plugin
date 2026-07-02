@@ -4,7 +4,7 @@ Bundle-Name: DBeaver AWS RDS IAM Auth
 Bundle-SymbolicName: dev.pauloricardo.dbeaver.aws.rds.iam;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: pauloricardo.dev
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Export-Package: dev.pauloricardo.dbeaver.aws.rds.iam.driver
