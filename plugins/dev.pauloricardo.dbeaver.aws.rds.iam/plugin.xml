@@ -15,7 +15,7 @@
                         id="postgresql-aws-rds-iam"
                         label="PostgreSQL AWS RDS IAM"
                         class="dev.pauloricardo.dbeaver.aws.rds.iam.driver.AwsRdsIamPostgresDriver"
-                        sampleURL="jdbc:awsrdsiam:postgresql://{host}:{port}/{database}?sslmode=require&amp;awsRegion={awsRegion}&amp;awsProfile={awsProfile}"
+                        sampleURL="jdbc:awsrdsiam:postgresql://{host}:{port}/{database}?sslmode=require"
                         useURL="true"
                         defaultPort="5432"
                         defaultDatabase="postgres"
@@ -29,6 +29,32 @@
                     <file type="jar" path="drivers/postgresql" bundle="drivers.postgresql"/>
                     <property name="loginTimeout" value="20"/>
                     <property name="connectTimeout" value="20"/>
+                    <propertyGroup label="AWS IAM">
+                        <property
+                                id="awsRegion"
+                                label="AWS Region"
+                                type="string"
+                                description="AWS region used to generate the RDS IAM authentication token."
+                                defaultValue="us-east-1"/>
+                        <property
+                                id="awsProfile"
+                                label="AWS Profile"
+                                type="string"
+                                description="AWS CLI profile used to generate the RDS IAM authentication token."
+                                defaultValue="default"/>
+                        <property
+                                id="awsCliPath"
+                                label="AWS CLI Path"
+                                type="string"
+                                description="Full path to the AWS CLI binary. Use /opt/homebrew/bin/aws on Apple Silicon Homebrew installations."
+                                defaultValue="aws"/>
+                        <property
+                                id="awsRdsIamDebug"
+                                label="Debug token generation"
+                                type="boolean"
+                                description="Print token generation diagnostics without printing the token value."
+                                defaultValue="false"/>
+                    </propertyGroup>
                     <parameter name="query-get-active-db" value="select current_schema()"/>
                     <parameter name="query-set-active-db" value="SET search_path = &quot;?&quot;"/>
                     <parameter name="active-entity-type" value="schema"/>
