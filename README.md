@@ -75,19 +75,34 @@ releng/br.com.ma9.dbeaver.aws.rds.iam.repository/target/repository
 
 ## Install In DBeaver
 
-During development:
+Use the published P2 update site:
+
+```text
+https://pauloricardo-ggs.github.io/dbeaver-iam-password-plugin/
+```
+
+In DBeaver:
+
+```text
+Help > Install New Software > Work with: https://pauloricardo-ggs.github.io/dbeaver-iam-password-plugin/
+```
+
+Select the AWS RDS IAM auth feature and finish the installation. Restart
+DBeaver when prompted.
+
+## Local Development Install
+
+For testing an unpublished local build:
 
 ```text
 Help > Install New Software > Add > Local
 ```
 
-Select:
+Select the generated repository directory:
 
 ```text
 releng/br.com.ma9.dbeaver.aws.rds.iam.repository/target/repository
 ```
-
-Then restart DBeaver.
 
 ## Configure DBeaver
 
@@ -125,8 +140,8 @@ For release tags, the pipeline:
 
 In the repository settings, configure GitHub Pages with source `Deploy from a branch`,
 branch `gh-pages`, folder `/`.
-After the first tag release, developers can install from the Pages URL:
+After the first tag release, users can install from the Pages URL:
 
 ```text
-Help > Install New Software > Work with: https://<owner>.github.io/<repository>/
+Help > Install New Software > Work with: https://pauloricardo-ggs.github.io/dbeaver-iam-password-plugin/
 ```
