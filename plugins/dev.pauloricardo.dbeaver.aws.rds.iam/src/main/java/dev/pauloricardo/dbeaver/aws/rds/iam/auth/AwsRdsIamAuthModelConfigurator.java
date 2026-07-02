@@ -68,7 +68,7 @@ public final class AwsRdsIamAuthModelConfigurator
                 awsRegionText,
                 AwsRdsIamAuthCredentials.DEFAULT_AWS_REGION
         ));
-        dataSource.setSavePassword(false);
+        dataSource.setSavePassword(true);
     }
 
     @Override
