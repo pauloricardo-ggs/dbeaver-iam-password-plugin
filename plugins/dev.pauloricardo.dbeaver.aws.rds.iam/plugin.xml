@@ -29,32 +29,6 @@
                     <file type="jar" path="drivers/postgresql" bundle="drivers.postgresql"/>
                     <property name="loginTimeout" value="20"/>
                     <property name="connectTimeout" value="20"/>
-                    <propertyGroup label="AWS IAM">
-                        <property
-                                id="awsRegion"
-                                label="AWS Region"
-                                type="string"
-                                description="AWS region used to generate the RDS IAM authentication token."
-                                defaultValue="us-east-1"/>
-                        <property
-                                id="awsProfile"
-                                label="AWS Profile"
-                                type="string"
-                                description="AWS CLI profile used to generate the RDS IAM authentication token."
-                                defaultValue="default"/>
-                        <property
-                                id="awsCliPath"
-                                label="AWS CLI Path"
-                                type="string"
-                                description="Full path to the AWS CLI binary. Use /opt/homebrew/bin/aws on Apple Silicon Homebrew installations."
-                                defaultValue="aws"/>
-                        <property
-                                id="awsRdsIamDebug"
-                                label="Debug token generation"
-                                type="boolean"
-                                description="Print token generation diagnostics without printing the token value."
-                                defaultValue="false"/>
-                    </propertyGroup>
                     <parameter name="query-get-active-db" value="select current_schema()"/>
                     <parameter name="query-set-active-db" value="SET search_path = &quot;?&quot;"/>
                     <parameter name="active-entity-type" value="schema"/>
@@ -63,5 +37,21 @@
                 </driver>
             </drivers>
         </datasource>
+    </extension>
+    <extension point="org.jkiss.dbeaver.dataSourceAuth">
+        <authModel
+                id="aws_rds_iam"
+                label="AWS RDS IAM"
+                description="AWS RDS IAM token authentication"
+                class="dev.pauloricardo.dbeaver.aws.rds.iam.auth.AwsRdsIamAuthModel"
+                default="true">
+            <datasource driver="postgresql-aws-rds-iam"/>
+            <replace model="native"/>
+        </authModel>
+    </extension>
+    <extension point="org.jkiss.dbeaver.ui.propertyConfigurator">
+        <propertyConfigurator
+                class="dev.pauloricardo.dbeaver.aws.rds.iam.auth.AwsRdsIamAuthModel"
+                uiClass="dev.pauloricardo.dbeaver.aws.rds.iam.auth.AwsRdsIamAuthModelConfigurator"/>
     </extension>
 </plugin>

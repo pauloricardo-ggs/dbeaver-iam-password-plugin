@@ -57,21 +57,30 @@ Example:
 jdbc:awsrdsiam:postgresql://mydb.abc123.us-east-1.rds.amazonaws.com:5432/app?sslmode=require
 ```
 
-Set `Username` to the database user mapped to IAM authentication in RDS. The
-password can be left empty; the plugin replaces it with a generated IAM token.
-
-In the connection's `Driver properties` tab, configure:
+In the authentication section, configure:
 
 | Property | Default |
 |---|---|
-| `awsRegion` | `us-east-1` |
-| `awsProfile` | `default` |
-| `awsCliPath` | `aws` |
-| `awsRdsIamDebug` | `false` |
+| `Username` | database user mapped to IAM authentication in RDS |
+| `AWS CLI Path` | `aws` |
+| `AWS Profile` | `default` |
+| `AWS Region` | `us-east-1` |
 
-If DBeaver cannot find the AWS CLI, set `awsCliPath` to the full binary path,
+The connection does not use a stored password. The plugin generates an IAM token
+and sends it to PostgreSQL as the password when DBeaver opens the JDBC
+connection.
+
+If DBeaver cannot find the AWS CLI, set `AWS CLI Path` to the full binary path,
 for example:
 
 ```text
 /opt/homebrew/bin/aws
 ```
+
+Older connections can still pass these values in the JDBC URL query string:
+
+| Query parameter | Default |
+|---|---|
+| `awsRegion` | `us-east-1` |
+| `awsProfile` | `default` |
+| `awsCliPath` | `aws` |
