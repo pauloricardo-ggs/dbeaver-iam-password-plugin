@@ -1,10 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-    <!--
-      MVP intentionally avoids DBeaver internal Secret Provider APIs.
-      The plugin contributes an OSGi bundle containing a JDBC wrapper driver.
-      In DBeaver, create a custom PostgreSQL driver using:
-      dev.pauloricardo.dbeaver.aws.rds.iam.driver.AwsRdsIamPostgresDriver
-    -->
+    <extension point="org.jkiss.dbeaver.dataSourceProvider">
+        <datasource
+                id="postgresql-aws-rds-iam"
+                parent="generic"
+                class="org.jkiss.dbeaver.ext.generic.GenericDataSourceProviderBasic"
+                label="PostgreSQL AWS RDS IAM"
+                description="PostgreSQL connections using AWS RDS IAM authentication"
+                icon="platform:/plugin/org.jkiss.dbeaver.ext.postgresql/icons/postgresql_icon.png"
+                dialect="postgresql">
+            <drivers managable="true">
+                <driver
+                        id="postgresql-aws-rds-iam"
+                        label="PostgreSQL AWS RDS IAM"
+                        class="dev.pauloricardo.dbeaver.aws.rds.iam.driver.AwsRdsIamPostgresDriver"
+                        sampleURL="jdbc:awsrdsiam:postgresql://{host}:{port}/{database}?sslmode=require&amp;awsRegion={awsRegion}&amp;awsProfile={awsProfile}"
+                        useURL="true"
+                        defaultPort="5432"
+                        defaultDatabase="postgres"
+                        defaultUser="postgres"
+                        allowsEmptyPassword="true"
+                        supportedConfigurationTypes="MANUAL,URL"
+                        description="PostgreSQL JDBC driver wrapper that generates AWS RDS IAM tokens with the AWS CLI."
+                        webURL="https://github.com/pauloricardo-ggs/dbeaver-iam-password-plugin">
+                    <file type="jar" path="bundle:/dev.pauloricardo.dbeaver.aws.rds.iam"/>
+                    <file type="jar" path="maven:/org.postgresql:postgresql:RELEASE[42.7.11]" bundle="!drivers.postgresql"/>
+                    <file type="jar" path="drivers/postgresql" bundle="drivers.postgresql"/>
+                    <property name="loginTimeout" value="20"/>
+                    <property name="connectTimeout" value="20"/>
+                    <parameter name="query-get-active-db" value="select current_schema()"/>
+                    <parameter name="query-set-active-db" value="SET search_path = &quot;?&quot;"/>
+                    <parameter name="active-entity-type" value="schema"/>
+                    <parameter name="supports-scroll" value="true"/>
+                    <parameter name="omit-single-catalog" value="true"/>
+                </driver>
+            </drivers>
+        </datasource>
+    </extension>
 </plugin>

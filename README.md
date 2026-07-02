@@ -74,14 +74,8 @@ DBeaver when prompted.
 
 ## Create An IAM Connection
 
-Create a PostgreSQL connection that uses the plugin driver instead of the
-standard PostgreSQL driver:
-
-```text
-dev.pauloricardo.dbeaver.aws.rds.iam.driver.AwsRdsIamPostgresDriver
-```
-
-Use this JDBC URL format:
+Create a new connection using the `PostgreSQL AWS RDS IAM` driver installed by
+the plugin. Use this JDBC URL format:
 
 ```text
 jdbc:awsrdsiam:postgresql://{host}:{port}/{database}?sslmode=require&awsRegion={region}&awsProfile={profile}

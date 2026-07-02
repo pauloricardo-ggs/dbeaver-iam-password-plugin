@@ -8,3 +8,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Export-Package: dev.pauloricardo.dbeaver.aws.rds.iam.driver
+Require-Bundle: org.jkiss.dbeaver.ext.generic
