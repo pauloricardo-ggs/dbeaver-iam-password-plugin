@@ -121,9 +121,10 @@ For release tags, the pipeline:
 - builds the Tycho project;
 - creates `dbeaver-aws-rds-iam-auth-update-site.zip`;
 - attaches the ZIP to a GitHub Release;
-- publishes the P2 update site to GitHub Pages.
+- publishes the P2 update site to the `gh-pages` branch.
 
-In the repository settings, configure GitHub Pages with source `GitHub Actions`.
+In the repository settings, configure GitHub Pages with source `Deploy from a branch`,
+branch `gh-pages`, folder `/`.
 After the first tag release, developers can install from the Pages URL:
 
 ```text

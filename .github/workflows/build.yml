@@ -11,8 +11,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -65,25 +63,11 @@ jobs:
           files: dbeaver-aws-rds-iam-auth-update-site.zip
           generate_release_notes: true
 
-      - name: Configure GitHub Pages
+      - name: Publish update site to GitHub Pages
         if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/configure-pages@v5
-
-      - name: Upload GitHub Pages artifact
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/upload-pages-artifact@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: releng/br.com.ma9.dbeaver.aws.rds.iam.repository/target/repository
-
-  deploy-pages:
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: releng/br.com.ma9.dbeaver.aws.rds.iam.repository/target/repository
+          force_orphan: true
