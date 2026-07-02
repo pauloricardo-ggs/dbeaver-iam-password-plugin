@@ -14,6 +14,8 @@
                 <driver
                         id="postgresql-aws-rds-iam"
                         label="PostgreSQL AWS RDS IAM"
+                        icon="platform:/plugin/org.jkiss.dbeaver.ext.postgresql/icons/postgresql_icon.png"
+                        iconBig="platform:/plugin/org.jkiss.dbeaver.ext.postgresql/icons/postgresql_icon_big.png"
                         class="dev.pauloricardo.dbeaver.aws.rds.iam.driver.AwsRdsIamPostgresDriver"
                         sampleURL="jdbc:awsrdsiam:postgresql://{host}:{port}/{database}?sslmode=require"
                         useURL="true"
@@ -22,6 +24,9 @@
                         defaultUser="postgres"
                         allowsEmptyPassword="true"
                         supportedConfigurationTypes="MANUAL,URL"
+                        promoted="1"
+                        categories="sql"
+                        dialect="postgresql"
                         description="PostgreSQL JDBC driver wrapper that generates AWS RDS IAM tokens with the AWS CLI."
                         webURL="https://github.com/pauloricardo-ggs/dbeaver-iam-password-plugin">
                     <file type="jar" path="bundle:/dev.pauloricardo.dbeaver.aws.rds.iam"/>
