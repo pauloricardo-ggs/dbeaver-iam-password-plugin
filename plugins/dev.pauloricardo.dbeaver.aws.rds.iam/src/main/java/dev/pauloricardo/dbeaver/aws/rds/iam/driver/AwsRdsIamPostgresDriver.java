@@ -33,14 +33,22 @@ public final class AwsRdsIamPostgresDriver implements Driver {
 
     @Override
     public Connection connect(String url, Properties info) throws SQLException {
+        try {
+            return connectInternal(url, info);
+        } catch (SQLException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new SQLException("Unexpected error in AWS RDS IAM PostgreSQL driver: " + e.getMessage(), e);
+        }
+    }
+
+    private Connection connectInternal(String url, Properties info) throws SQLException {
         if (!acceptsURL(url)) {
             return null;
         }
 
         Properties connectionProperties = new Properties();
-        if (info != null) {
-            connectionProperties.putAll(info);
-        }
+        copyNonNullProperties(info, connectionProperties);
 
         String postgresUrl = toPostgresUrl(url);
         JdbcConnectionSettings settings = JdbcConnectionSettings.from(postgresUrl, connectionProperties);
@@ -50,6 +58,9 @@ public final class AwsRdsIamPostgresDriver implements Driver {
         connectionProperties.setProperty("sslmode", connectionProperties.getProperty("sslmode", "require"));
 
         Connection connection = loadPostgresDriver(postgresUrl).connect(postgresUrl, connectionProperties);
+        if (connection == null) {
+            throw new SQLException("PostgreSQL JDBC driver did not accept URL: " + postgresUrl);
+        }
         applySessionRole(connection, settings.sessionRole());
         return connection;
     }
@@ -100,6 +111,19 @@ public final class AwsRdsIamPostgresDriver implements Driver {
 
     private static String toPostgresUrl(String url) {
         return POSTGRES_URL_PREFIX + url.substring(URL_PREFIX.length());
+    }
+
+    private static void copyNonNullProperties(Properties source, Properties target) {
+        if (source == null) {
+            return;
+        }
+
+        for (String propertyName : source.stringPropertyNames()) {
+            String value = source.getProperty(propertyName);
+            if (value != null) {
+                target.setProperty(propertyName, value);
+            }
+        }
     }
 
     private static void applySessionRole(Connection connection, String sessionRole) throws SQLException {
