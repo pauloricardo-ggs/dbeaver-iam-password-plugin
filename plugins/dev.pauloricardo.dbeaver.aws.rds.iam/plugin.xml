@@ -4,8 +4,8 @@
     <extension point="org.jkiss.dbeaver.dataSourceProvider">
         <datasource
                 id="postgresql-aws-rds-iam"
-                parent="generic"
-                class="org.jkiss.dbeaver.ext.generic.GenericDataSourceProviderBasic"
+                parent="postgresql"
+                class="org.jkiss.dbeaver.ext.postgresql.PostgreDataSourceProvider"
                 label="PostgreSQL AWS RDS IAM"
                 description="PostgreSQL connections using AWS RDS IAM authentication"
                 icon="platform:/plugin/org.jkiss.dbeaver.ext.postgresql/icons/postgresql_icon.png"
@@ -39,6 +39,7 @@
                     <parameter name="active-entity-type" value="schema"/>
                     <parameter name="supports-scroll" value="true"/>
                     <parameter name="omit-single-catalog" value="true"/>
+                    <parameter name="serverType" value="postgresql"/>
                 </driver>
             </drivers>
         </datasource>

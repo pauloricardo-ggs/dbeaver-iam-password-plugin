@@ -9,7 +9,8 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Export-Package: dev.pauloricardo.dbeaver.aws.rds.iam.auth,
  dev.pauloricardo.dbeaver.aws.rds.iam.driver
-Require-Bundle: org.jkiss.dbeaver.ext.generic,
+Require-Bundle: org.jkiss.dbeaver.ext.postgresql,
+ org.jkiss.dbeaver.ext.generic,
  org.jkiss.dbeaver.model,
  org.jkiss.dbeaver.ui,
  org.eclipse.swt
