@@ -150,7 +150,7 @@ final class JdbcConnectionSettings {
     private static String firstNonBlank(String... values) {
         for (String value : values) {
             if (!isBlank(value)) {
-                return value;
+                return value.trim();
             }
         }
         return null;

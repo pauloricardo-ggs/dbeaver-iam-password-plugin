@@ -26,10 +26,10 @@ public final class AwsRdsIamAuthModelConfigurator
             @NotNull Runnable propertyChangeListener
     ) {
         usernameText = createField(authPanel, "Username", propertyChangeListener);
+        awsSessionRoleText = createField(authPanel, "Session Role", propertyChangeListener);
         awsCliPathText = createField(authPanel, "AWS CLI Path", propertyChangeListener);
         awsProfileText = createField(authPanel, "AWS Profile", propertyChangeListener);
         awsRegionText = createField(authPanel, "AWS Region", propertyChangeListener);
-        awsSessionRoleText = createField(authPanel, "Session Role", propertyChangeListener);
     }
 
     @Override

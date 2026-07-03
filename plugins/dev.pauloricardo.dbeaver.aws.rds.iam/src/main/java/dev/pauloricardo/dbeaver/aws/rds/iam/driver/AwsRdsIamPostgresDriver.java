@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Statement;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -47,14 +48,10 @@ public final class AwsRdsIamPostgresDriver implements Driver {
 
         connectionProperties.setProperty("password", token);
         connectionProperties.setProperty("sslmode", connectionProperties.getProperty("sslmode", "require"));
-        if (!settings.sessionRole().isBlank()) {
-            connectionProperties.setProperty(
-                "options",
-                appendSessionRoleOption(connectionProperties.getProperty("options"), settings.sessionRole())
-            );
-        }
 
-        return loadPostgresDriver(postgresUrl).connect(postgresUrl, connectionProperties);
+        Connection connection = loadPostgresDriver(postgresUrl).connect(postgresUrl, connectionProperties);
+        applySessionRole(connection, settings.sessionRole());
+        return connection;
     }
 
     @Override
@@ -69,7 +66,7 @@ public final class AwsRdsIamPostgresDriver implements Driver {
                 property("awsRegion", false, "AWS region. Default: us-east-1"),
                 property("awsProfile", false, "AWS CLI profile. Default: default"),
                 property("awsCliPath", false, "AWS CLI binary path. Default: aws"),
-                property("sessionRole", false, "Optional PostgreSQL role to apply as options=-c role=<role>"),
+                property("sessionRole", false, "Optional PostgreSQL role to apply with SET ROLE after connecting"),
                 property("awsRdsIamDebug", false, "Print token generation diagnostics without token value")
         };
     }
@@ -105,12 +102,25 @@ public final class AwsRdsIamPostgresDriver implements Driver {
         return POSTGRES_URL_PREFIX + url.substring(URL_PREFIX.length());
     }
 
-    private static String appendSessionRoleOption(String existingOptions, String sessionRole) {
-        String roleOption = "-c role=" + sessionRole;
-        if (existingOptions == null || existingOptions.isBlank()) {
-            return roleOption;
+    private static void applySessionRole(Connection connection, String sessionRole) throws SQLException {
+        if (sessionRole == null || sessionRole.isBlank()) {
+            return;
         }
-        return existingOptions + " " + roleOption;
+
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("SET ROLE " + quoteIdentifier(sessionRole.trim()));
+        } catch (SQLException e) {
+            try {
+                connection.close();
+            } catch (SQLException closeError) {
+                e.addSuppressed(closeError);
+            }
+            throw e;
+        }
+    }
+
+    private static String quoteIdentifier(String identifier) {
+        return "\"" + identifier.replace("\"", "\"\"") + "\"";
     }
 
     private static Driver loadPostgresDriver(String postgresUrl) throws SQLException {

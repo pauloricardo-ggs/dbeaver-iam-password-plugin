@@ -65,7 +65,7 @@ In the authentication section, configure:
 | `AWS CLI Path` | `aws` |
 | `AWS Profile` | `default` |
 | `AWS Region` | `us-east-1` |
-| `Session Role` | empty (optional, PostgreSQL role via `options=-c role=...`) |
+| `Session Role` | empty (optional, PostgreSQL role applied with `SET ROLE`) |
 
 The connection does not use a stored password. The plugin generates an IAM token
 and sends it to PostgreSQL as the password when DBeaver opens the JDBC
