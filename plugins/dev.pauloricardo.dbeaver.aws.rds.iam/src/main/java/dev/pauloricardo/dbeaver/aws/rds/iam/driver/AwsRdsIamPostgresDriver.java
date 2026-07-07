@@ -38,7 +38,8 @@ public final class AwsRdsIamPostgresDriver implements Driver {
         } catch (SQLException e) {
             throw e;
         } catch (RuntimeException e) {
-            throw new SQLException("Unexpected error in AWS RDS IAM PostgreSQL driver: " + e.getMessage(), e);
+            throw new SQLException("Unexpected error in AWS RDS IAM PostgreSQL driver ("
+                    + e.getClass().getName() + "): " + nullSafeMessage(e), e);
         }
     }
 
@@ -145,6 +146,11 @@ public final class AwsRdsIamPostgresDriver implements Driver {
 
     private static String quoteIdentifier(String identifier) {
         return "\"" + identifier.replace("\"", "\"\"") + "\"";
+    }
+
+    private static String nullSafeMessage(RuntimeException exception) {
+        String message = exception.getMessage();
+        return message == null || message.isBlank() ? "no detail message" : message;
     }
 
     private static Driver loadPostgresDriver(String postgresUrl) throws SQLException {

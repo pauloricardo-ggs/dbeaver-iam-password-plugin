@@ -24,7 +24,11 @@ public final class AwsRdsIamAuthModel extends AuthModelDatabaseNative<AwsRdsIamA
             @NotNull DBPConnectionConfiguration configuration
     ) {
         AwsRdsIamAuthCredentials credentials = createCredentials();
-        credentials.setUserName(configuration.getUserName());
+        if (configuration == null) {
+            return credentials;
+        }
+
+        credentials.setUserName(trimToEmpty(configuration.getUserName()));
         credentials.setAwsRegion(firstNonBlank(
                 configuration.getAuthProperty(AwsRdsIamAuthCredentials.PROP_AWS_REGION),
                 configuration.getProperty(AwsRdsIamAuthCredentials.PROP_AWS_REGION),
@@ -56,12 +60,29 @@ public final class AwsRdsIamAuthModel extends AuthModelDatabaseNative<AwsRdsIamA
             @NotNull DBPConnectionConfiguration configuration,
             @NotNull AwsRdsIamAuthCredentials credentials
     ) {
-        configuration.setUserName(credentials.getUserName());
+        if (configuration == null) {
+            return;
+        }
+
+        AwsRdsIamAuthCredentials safeCredentials = credentials == null ? createCredentials() : credentials;
+        configuration.setUserName(trimToEmpty(safeCredentials.getUserName()));
         configuration.setUserPassword(null);
-        configuration.setAuthProperty(AwsRdsIamAuthCredentials.PROP_AWS_REGION, credentials.getAwsRegion());
-        configuration.setAuthProperty(AwsRdsIamAuthCredentials.PROP_AWS_PROFILE, credentials.getAwsProfile());
-        configuration.setAuthProperty(AwsRdsIamAuthCredentials.PROP_AWS_CLI_PATH, credentials.getAwsCliPath());
-        configuration.setAuthProperty(AwsRdsIamAuthCredentials.PROP_SESSION_ROLE, credentials.getSessionRole());
+        configuration.setAuthProperty(
+                AwsRdsIamAuthCredentials.PROP_AWS_REGION,
+                defaultIfBlank(safeCredentials.getAwsRegion(), AwsRdsIamAuthCredentials.DEFAULT_AWS_REGION)
+        );
+        configuration.setAuthProperty(
+                AwsRdsIamAuthCredentials.PROP_AWS_PROFILE,
+                defaultIfBlank(safeCredentials.getAwsProfile(), AwsRdsIamAuthCredentials.DEFAULT_AWS_PROFILE)
+        );
+        configuration.setAuthProperty(
+                AwsRdsIamAuthCredentials.PROP_AWS_CLI_PATH,
+                defaultIfBlank(safeCredentials.getAwsCliPath(), AwsRdsIamAuthCredentials.DEFAULT_AWS_CLI_PATH)
+        );
+        configuration.setAuthProperty(
+                AwsRdsIamAuthCredentials.PROP_SESSION_ROLE,
+                trimToEmpty(safeCredentials.getSessionRole())
+        );
     }
 
     @Override
@@ -72,23 +93,31 @@ public final class AwsRdsIamAuthModel extends AuthModelDatabaseNative<AwsRdsIamA
             @NotNull Properties connectProps,
             boolean collectSecuredProps
     ) {
-        if (!isBlank(credentials.getUserName())) {
-            connectProps.put(DBConstants.DATA_SOURCE_PROPERTY_USER, credentials.getUserName());
+        if (connectProps == null) {
+            return;
+        }
+
+        AwsRdsIamAuthCredentials safeCredentials = credentials == null
+                ? loadCredentials(dataSourceContainer, configuration)
+                : credentials;
+
+        if (!isBlank(safeCredentials.getUserName())) {
+            connectProps.put(DBConstants.DATA_SOURCE_PROPERTY_USER, safeCredentials.getUserName());
         }
         connectProps.put(
                 AwsRdsIamAuthCredentials.PROP_AWS_REGION,
-                defaultIfBlank(credentials.getAwsRegion(), AwsRdsIamAuthCredentials.DEFAULT_AWS_REGION)
+                defaultIfBlank(safeCredentials.getAwsRegion(), AwsRdsIamAuthCredentials.DEFAULT_AWS_REGION)
         );
         connectProps.put(
                 AwsRdsIamAuthCredentials.PROP_AWS_PROFILE,
-                defaultIfBlank(credentials.getAwsProfile(), AwsRdsIamAuthCredentials.DEFAULT_AWS_PROFILE)
+                defaultIfBlank(safeCredentials.getAwsProfile(), AwsRdsIamAuthCredentials.DEFAULT_AWS_PROFILE)
         );
         connectProps.put(
                 AwsRdsIamAuthCredentials.PROP_AWS_CLI_PATH,
-                defaultIfBlank(credentials.getAwsCliPath(), AwsRdsIamAuthCredentials.DEFAULT_AWS_CLI_PATH)
+                defaultIfBlank(safeCredentials.getAwsCliPath(), AwsRdsIamAuthCredentials.DEFAULT_AWS_CLI_PATH)
         );
-        if (!isBlank(credentials.getSessionRole())) {
-            connectProps.put(AwsRdsIamAuthCredentials.PROP_SESSION_ROLE, credentials.getSessionRole());
+        if (!isBlank(safeCredentials.getSessionRole())) {
+            connectProps.put(AwsRdsIamAuthCredentials.PROP_SESSION_ROLE, safeCredentials.getSessionRole());
         }
     }
 
@@ -113,6 +142,10 @@ public final class AwsRdsIamAuthModel extends AuthModelDatabaseNative<AwsRdsIamA
 
     private static String defaultIfBlank(String value, String defaultValue) {
         return isBlank(value) ? defaultValue : value.trim();
+    }
+
+    private static String trimToEmpty(String value) {
+        return value == null ? "" : value.trim();
     }
 
     private static boolean isBlank(String value) {
