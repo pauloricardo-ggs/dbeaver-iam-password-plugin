@@ -71,11 +71,12 @@ The connection does not use a stored password. The plugin generates an IAM token
 and sends it to PostgreSQL as the password when DBeaver opens the JDBC
 connection.
 
-If DBeaver cannot find the AWS CLI, set `AWS CLI Path` to the full binary path,
-for example:
+If DBeaver cannot find the AWS CLI, set `AWS CLI Path` to the full binary path
+returned by:
 
 ```text
-/opt/homebrew/bin/aws
+macOS: which aws
+Windows: where.exe aws
 ```
 
 Older connections can still pass these values in the JDBC URL query string:

@@ -75,9 +75,18 @@ public final class AwsRdsIamAuthModel extends AuthModelDatabaseNative<AwsRdsIamA
         if (!isBlank(credentials.getUserName())) {
             connectProps.put(DBConstants.DATA_SOURCE_PROPERTY_USER, credentials.getUserName());
         }
-        connectProps.put(AwsRdsIamAuthCredentials.PROP_AWS_REGION, credentials.getAwsRegion());
-        connectProps.put(AwsRdsIamAuthCredentials.PROP_AWS_PROFILE, credentials.getAwsProfile());
-        connectProps.put(AwsRdsIamAuthCredentials.PROP_AWS_CLI_PATH, credentials.getAwsCliPath());
+        connectProps.put(
+                AwsRdsIamAuthCredentials.PROP_AWS_REGION,
+                defaultIfBlank(credentials.getAwsRegion(), AwsRdsIamAuthCredentials.DEFAULT_AWS_REGION)
+        );
+        connectProps.put(
+                AwsRdsIamAuthCredentials.PROP_AWS_PROFILE,
+                defaultIfBlank(credentials.getAwsProfile(), AwsRdsIamAuthCredentials.DEFAULT_AWS_PROFILE)
+        );
+        connectProps.put(
+                AwsRdsIamAuthCredentials.PROP_AWS_CLI_PATH,
+                defaultIfBlank(credentials.getAwsCliPath(), AwsRdsIamAuthCredentials.DEFAULT_AWS_CLI_PATH)
+        );
         if (!isBlank(credentials.getSessionRole())) {
             connectProps.put(AwsRdsIamAuthCredentials.PROP_SESSION_ROLE, credentials.getSessionRole());
         }
@@ -100,6 +109,10 @@ public final class AwsRdsIamAuthModel extends AuthModelDatabaseNative<AwsRdsIamA
             }
         }
         return null;
+    }
+
+    private static String defaultIfBlank(String value, String defaultValue) {
+        return isBlank(value) ? defaultValue : value.trim();
     }
 
     private static boolean isBlank(String value) {

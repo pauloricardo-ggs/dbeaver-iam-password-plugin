@@ -8,17 +8,13 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 final class AwsCliTokenGenerator {
     private static final Duration TIMEOUT = Duration.ofSeconds(20);
-    private static final String[] DEFAULT_AWS_CLI_PATHS = {
-            "/opt/homebrew/bin/aws",
-            "/usr/local/bin/aws",
-            "/usr/bin/aws"
-    };
-
     String generate(JdbcConnectionSettings settings) throws SQLException {
         List<String> command = tokenCommand(settings.awsCliPath(), settings);
 
@@ -37,7 +33,7 @@ final class AwsCliTokenGenerator {
             }
 
             IOException lastException = e;
-            for (String fallbackPath : DEFAULT_AWS_CLI_PATHS) {
+            for (String fallbackPath : defaultAwsCliCandidates()) {
                 if (!new File(fallbackPath).canExecute()) {
                     continue;
                 }
@@ -50,7 +46,8 @@ final class AwsCliTokenGenerator {
             }
 
             throw new SQLException("Could not execute AWS CLI. Set awsCliPath to the full AWS CLI binary path, "
-                    + "for example /opt/homebrew/bin/aws on Apple Silicon Homebrew. Command: " + command.get(0), lastException);
+                    + "for example /opt/homebrew/bin/aws on Apple Silicon Homebrew or "
+                    + "C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe on Windows. Command: " + command.get(0), lastException);
         }
     }
 
@@ -100,6 +97,33 @@ final class AwsCliTokenGenerator {
 
     private static boolean isDefaultAwsCliPath(String awsCliPath) {
         return awsCliPath == null || awsCliPath.isBlank() || "aws".equals(awsCliPath);
+    }
+
+    private static List<String> defaultAwsCliCandidates() {
+        Set<String> candidates = new LinkedHashSet<>();
+        if (isWindows()) {
+            candidates.add("aws.exe");
+            addWindowsAwsCliPath(candidates, System.getenv("ProgramFiles"));
+            addWindowsAwsCliPath(candidates, System.getenv("ProgramFiles(x86)"));
+            addWindowsAwsCliPath(candidates, System.getenv("LocalAppData"));
+        } else {
+            candidates.add("/opt/homebrew/bin/aws");
+            candidates.add("/usr/local/bin/aws");
+            candidates.add("/usr/bin/aws");
+        }
+        return new ArrayList<>(candidates);
+    }
+
+    private static void addWindowsAwsCliPath(Set<String> candidates, String basePath) {
+        if (basePath == null || basePath.isBlank()) {
+            return;
+        }
+        candidates.add(basePath + "\\Amazon\\AWSCLIV2\\aws.exe");
+    }
+
+    private static boolean isWindows() {
+        String osName = System.getProperty("os.name", "");
+        return osName.toLowerCase().contains("win");
     }
 
     private static String read(java.io.InputStream inputStream) throws IOException {
