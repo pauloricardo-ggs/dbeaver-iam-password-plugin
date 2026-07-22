@@ -14,6 +14,7 @@ final class JdbcConnectionSettings {
     static final String DEFAULT_PROFILE = "default";
     static final String DEFAULT_AWS_CLI_PATH = "aws";
     static final String DEFAULT_SESSION_ROLE = "";
+    static final String CONNECTION_MODE_SSM = "ssm";
 
     private final String hostname;
     private final int port;
@@ -23,6 +24,11 @@ final class JdbcConnectionSettings {
     private final String awsCliPath;
     private final String sessionRole;
     private final boolean debug;
+    private final String connectionMode;
+    private final String ec2NameTag;
+    private final String rdsNameTag;
+    private final int rdsPort;
+    private final int localPort;
 
     private JdbcConnectionSettings(
             String hostname,
@@ -32,7 +38,12 @@ final class JdbcConnectionSettings {
             String profile,
             String awsCliPath,
             String sessionRole,
-            boolean debug
+            boolean debug,
+            String connectionMode,
+            String ec2NameTag,
+            String rdsNameTag,
+            int rdsPort,
+            int localPort
     ) {
         this.hostname = hostname;
         this.port = port;
@@ -42,6 +53,11 @@ final class JdbcConnectionSettings {
         this.awsCliPath = awsCliPath;
         this.sessionRole = sessionRole;
         this.debug = debug;
+        this.connectionMode = connectionMode;
+        this.ec2NameTag = ec2NameTag;
+        this.rdsNameTag = rdsNameTag;
+        this.rdsPort = rdsPort;
+        this.localPort = localPort;
     }
 
     static JdbcConnectionSettings from(String postgresUrl, Properties properties) throws SQLException {
@@ -69,6 +85,23 @@ final class JdbcConnectionSettings {
                 DEFAULT_SESSION_ROLE
         );
         String debugValue = firstNonBlank(properties.getProperty("awsRdsIamDebug"), queryParams.get("awsRdsIamDebug"), "false");
+        String connectionMode = firstNonBlank(properties.getProperty("awsConnectionMode"), "direct");
+        String ec2NameTag = firstNonBlank(properties.getProperty("ec2NameTag"), "");
+        String rdsNameTag = firstNonBlank(properties.getProperty("rdsNameTag"), "");
+        int rdsPort = parsePort(firstNonBlank(properties.getProperty("rdsPort"), "5432"), "RDS Port");
+        int localPort = parseOptionalPort(properties.getProperty("localPort"), "Local Port");
+
+        if (CONNECTION_MODE_SSM.equals(connectionMode)) {
+            if (isBlank(ec2NameTag)) {
+                throw new SQLException("Missing required AWS RDS SSM property 'EC2 Name Tag'.");
+            }
+            if (isBlank(rdsNameTag)) {
+                throw new SQLException("Missing required AWS RDS SSM property 'RDS Name Tag'.");
+            }
+            if (localPort == 0) {
+                throw new SQLException("Missing required AWS RDS SSM property 'Local Port'.");
+            }
+        }
 
         return new JdbcConnectionSettings(
                 parsed.host(),
@@ -78,7 +111,12 @@ final class JdbcConnectionSettings {
                 profile,
                 awsCliPath,
                 sessionRole,
-                Boolean.parseBoolean(debugValue)
+                Boolean.parseBoolean(debugValue),
+                connectionMode,
+                ec2NameTag,
+                rdsNameTag,
+                rdsPort,
+                localPort
         );
     }
 
@@ -114,6 +152,63 @@ final class JdbcConnectionSettings {
         return debug;
     }
 
+    boolean usesSsmTunnel() {
+        return CONNECTION_MODE_SSM.equals(connectionMode);
+    }
+
+    String ec2NameTag() {
+        return ec2NameTag;
+    }
+
+    String rdsNameTag() {
+        return rdsNameTag;
+    }
+
+    int rdsPort() {
+        return rdsPort;
+    }
+
+    int localPort() {
+        return localPort;
+    }
+
+    JdbcConnectionSettings withIamEndpoint(String hostname, int port) {
+        return new JdbcConnectionSettings(
+                hostname,
+                port,
+                username,
+                region,
+                profile,
+                awsCliPath,
+                sessionRole,
+                debug,
+                connectionMode,
+                ec2NameTag,
+                rdsNameTag,
+                rdsPort,
+                localPort
+        );
+    }
+
+    static String withNetworkEndpoint(String postgresUrl, String hostname, int port) throws SQLException {
+        String uriValue = postgresUrl.substring(AwsRdsIamPostgresDriver.POSTGRES_URL_PREFIX.length());
+        try {
+            URI uri = new URI("postgresql:" + uriValue);
+            URI rewritten = new URI(
+                    uri.getScheme(),
+                    uri.getUserInfo(),
+                    hostname,
+                    port,
+                    uri.getPath(),
+                    uri.getQuery(),
+                    uri.getFragment()
+            );
+            return "jdbc:" + rewritten;
+        } catch (URISyntaxException e) {
+            throw new SQLException("Invalid JDBC URL: " + postgresUrl, e);
+        }
+    }
+
     private static ParsedJdbcUrl parse(String postgresUrl) throws SQLException {
         String uriValue = postgresUrl.substring(AwsRdsIamPostgresDriver.POSTGRES_URL_PREFIX.length());
         try {
@@ -145,6 +240,22 @@ final class JdbcConnectionSettings {
 
     private static String decode(String value) {
         return URLDecoder.decode(value, StandardCharsets.UTF_8);
+    }
+
+    private static int parseOptionalPort(String value, String label) throws SQLException {
+        return isBlank(value) ? 0 : parsePort(value, label);
+    }
+
+    private static int parsePort(String value, String label) throws SQLException {
+        try {
+            int port = Integer.parseInt(value.trim());
+            if (port < 1 || port > 65535) {
+                throw new SQLException(label + " must be between 1 and 65535.");
+            }
+            return port;
+        } catch (NumberFormatException e) {
+            throw new SQLException(label + " must be a valid port number.", e);
+        }
     }
 
     private static String firstNonBlank(String... values) {

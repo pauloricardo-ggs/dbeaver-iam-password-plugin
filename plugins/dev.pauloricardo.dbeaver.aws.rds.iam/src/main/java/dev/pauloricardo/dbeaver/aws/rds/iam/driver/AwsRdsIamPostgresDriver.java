@@ -53,17 +53,39 @@ public final class AwsRdsIamPostgresDriver implements Driver {
 
         String postgresUrl = toPostgresUrl(url);
         JdbcConnectionSettings settings = JdbcConnectionSettings.from(postgresUrl, connectionProperties);
-        String token = new AwsCliTokenGenerator().generate(settings);
+        SsmTunnelManager.TunnelLease tunnel = null;
+        String networkUrl = postgresUrl;
+        JdbcConnectionSettings tokenSettings = settings;
 
-        connectionProperties.setProperty("password", token);
-        connectionProperties.setProperty("sslmode", connectionProperties.getProperty("sslmode", "require"));
+        try {
+            if (settings.usesSsmTunnel()) {
+                String instanceId = new Ec2TagResolver().resolve(settings);
+                RdsTagResolver.RdsEndpoint rdsEndpoint = new RdsTagResolver().resolve(settings);
+                tunnel = new SsmTunnelManager().acquire(settings, instanceId, rdsEndpoint);
+                tokenSettings = settings.withIamEndpoint(rdsEndpoint.hostname(), rdsEndpoint.port());
+                networkUrl = JdbcConnectionSettings.withNetworkEndpoint(
+                        postgresUrl, "127.0.0.1", tunnel.localPort());
+            }
 
-        Connection connection = loadPostgresDriver(postgresUrl).connect(postgresUrl, connectionProperties);
-        if (connection == null) {
-            throw new SQLException("PostgreSQL JDBC driver did not accept URL: " + postgresUrl);
+            String token = new AwsCliTokenGenerator().generate(tokenSettings);
+            connectionProperties.setProperty("password", token);
+            connectionProperties.setProperty("sslmode", connectionProperties.getProperty("sslmode", "require"));
+
+            Connection connection = loadPostgresDriver(networkUrl).connect(networkUrl, connectionProperties);
+            if (connection == null) {
+                throw new SQLException("PostgreSQL JDBC driver did not accept URL: " + networkUrl);
+            }
+            applySessionRole(connection, settings.sessionRole());
+            if (tunnel != null) {
+                return TunneledConnection.wrap(connection, tunnel);
+            }
+            return connection;
+        } catch (SQLException | RuntimeException e) {
+            if (tunnel != null) {
+                tunnel.close();
+            }
+            throw e;
         }
-        applySessionRole(connection, settings.sessionRole());
-        return connection;
     }
 
     @Override
@@ -79,6 +101,10 @@ public final class AwsRdsIamPostgresDriver implements Driver {
                 property("awsProfile", false, "AWS CLI profile. Default: default"),
                 property("awsCliPath", false, "AWS CLI binary path. Default: aws"),
                 property("sessionRole", false, "Optional PostgreSQL role to apply with SET ROLE after connecting"),
+                property("ec2NameTag", false, "EC2 Name tag used by AWS RDS SSM authentication"),
+                property("rdsNameTag", false, "RDS Name tag used by AWS RDS SSM authentication"),
+                property("rdsPort", false, "Remote RDS port used by the SSM tunnel"),
+                property("localPort", false, "Local port exposed by the SSM tunnel"),
                 property("awsRdsIamDebug", false, "Print token generation diagnostics without token value")
         };
     }

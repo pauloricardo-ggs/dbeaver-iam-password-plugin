@@ -54,10 +54,20 @@
             <datasource driver="postgresql-aws-rds-iam"/>
             <replace model="native"/>
         </authModel>
+        <authModel
+                id="aws_rds_ssm"
+                label="AWS RDS SSM"
+                description="AWS RDS IAM token authentication through an SSM tunnel"
+                class="dev.pauloricardo.dbeaver.aws.rds.iam.auth.AwsRdsSsmAuthModel">
+            <datasource driver="postgresql-aws-rds-iam"/>
+        </authModel>
     </extension>
     <extension point="org.jkiss.dbeaver.ui.propertyConfigurator">
         <propertyConfigurator
                 class="dev.pauloricardo.dbeaver.aws.rds.iam.auth.AwsRdsIamAuthModel"
                 uiClass="dev.pauloricardo.dbeaver.aws.rds.iam.auth.AwsRdsIamAuthModelConfigurator"/>
+        <propertyConfigurator
+                class="dev.pauloricardo.dbeaver.aws.rds.iam.auth.AwsRdsSsmAuthModel"
+                uiClass="dev.pauloricardo.dbeaver.aws.rds.iam.auth.AwsRdsSsmAuthModelConfigurator"/>
     </extension>
 </plugin>
