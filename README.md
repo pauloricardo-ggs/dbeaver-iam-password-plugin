@@ -481,6 +481,13 @@ document whenever possible.
   and the standard Session Manager Plugin directories to the subprocess `PATH`
   on macOS, Linux, and Windows.
 
+`Invalid JSON ... Error parsing parameter '--filters'` on Windows
+
+: Update this plugin to the latest build. Earlier builds passed EC2, RDS, and
+  SSM structured parameters as inline JSON, whose embedded double quotes could
+  be removed by Windows process argument handling. The current build uses AWS
+  CLI shorthand syntax on macOS, Linux, and Windows.
+
 `Local Port ... is already in use`
 
 : Update this plugin to the latest build. Earlier builds could leave an orphaned

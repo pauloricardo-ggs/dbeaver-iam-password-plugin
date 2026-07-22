@@ -9,9 +9,8 @@ final class Ec2TagResolver {
                 settings,
                 "ec2", "describe-instances",
                 "--filters",
-                "[{\"Name\":\"tag:Name\",\"Values\":[\""
-                        + AwsCliCommand.jsonEscape(settings.ec2NameTag())
-                        + "\"]},{\"Name\":\"instance-state-name\",\"Values\":[\"running\"]}]",
+                "Name=tag:Name,Values=" + settings.ec2NameTag(),
+                "Name=instance-state-name,Values=running",
                 "--query", "Reservations[].Instances[].InstanceId",
                 "--output", "text"
         );

@@ -57,9 +57,9 @@ final class SsmTunnelManager {
     }
 
     private static ManagedTunnel start(JdbcConnectionSettings settings, TunnelKey key) throws SQLException {
-        String parameters = "{\"host\":[\"" + AwsCliCommand.jsonEscape(key.rdsHostname()) + "\"],"
-                + "\"portNumber\":[\"" + key.rdsPort() + "\"],"
-                + "\"localPortNumber\":[\"" + key.localPort() + "\"]}";
+        String parameters = "host=" + key.rdsHostname()
+                + ",portNumber=" + key.rdsPort()
+                + ",localPortNumber=" + key.localPort();
         List<String> arguments = AwsCliCommand.commonArguments(
                 settings,
                 "ssm", "start-session",

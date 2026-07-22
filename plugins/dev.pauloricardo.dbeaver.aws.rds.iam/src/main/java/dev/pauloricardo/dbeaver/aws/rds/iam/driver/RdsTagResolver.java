@@ -9,8 +9,7 @@ final class RdsTagResolver {
                 settings,
                 "resourcegroupstaggingapi", "get-resources",
                 "--resource-type-filters", "rds:db",
-                "--tag-filters", "[{\"Key\":\"Name\",\"Values\":[\""
-                        + AwsCliCommand.jsonEscape(settings.rdsNameTag()) + "\"]}]",
+                "--tag-filters", "Key=Name,Values=" + settings.rdsNameTag(),
                 "--query", "ResourceTagMappingList[].ResourceARN",
                 "--output", "text"
         );

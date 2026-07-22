@@ -116,33 +116,6 @@ final class AwsCliCommand {
         return " Error: " + stderr.replaceAll("(?i)(password|token|secret)=\\S+", "$1=<redacted>");
     }
 
-    static String jsonEscape(String value) {
-        if (value == null) {
-            return "";
-        }
-        StringBuilder escaped = new StringBuilder(value.length());
-        for (int index = 0; index < value.length(); index++) {
-            char character = value.charAt(index);
-            switch (character) {
-                case '\\' -> escaped.append("\\\\");
-                case '"' -> escaped.append("\\\"");
-                case '\b' -> escaped.append("\\b");
-                case '\f' -> escaped.append("\\f");
-                case '\n' -> escaped.append("\\n");
-                case '\r' -> escaped.append("\\r");
-                case '\t' -> escaped.append("\\t");
-                default -> {
-                    if (character < 0x20) {
-                        escaped.append(String.format("\\u%04x", (int) character));
-                    } else {
-                        escaped.append(character);
-                    }
-                }
-            }
-        }
-        return escaped.toString();
-    }
-
     private static List<String> command(String executable, List<String> arguments) {
         List<String> command = new ArrayList<>(arguments.size() + 1);
         command.add(executable);
