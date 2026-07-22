@@ -1,6 +1,7 @@
 package dev.pauloricardo.dbeaver.aws.rds.iam.driver;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,6 +11,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -24,7 +26,7 @@ final class AwsCliCommand {
         for (String executable : executableCandidates(settings.awsCliPath())) {
             List<String> command = command(executable, arguments);
             try {
-                Process process = new ProcessBuilder(command).start();
+                Process process = processBuilder(executable, arguments).start();
                 StringBuilder stdoutBuffer = new StringBuilder();
                 StringBuilder stderrBuffer = new StringBuilder();
                 Thread stdoutThread = drainAsync(process.getInputStream(), stdoutBuffer, "aws-cli-stdout");
@@ -61,7 +63,7 @@ final class AwsCliCommand {
         IOException lastException = null;
         for (String executable : executableCandidates(settings.awsCliPath())) {
             try {
-                return new ProcessBuilder(command(executable, arguments)).start();
+                return processBuilder(executable, arguments).start();
             } catch (IOException e) {
                 lastException = e;
             }
@@ -146,6 +148,54 @@ final class AwsCliCommand {
         command.add(executable);
         command.addAll(arguments);
         return command;
+    }
+
+    private static ProcessBuilder processBuilder(String executable, List<String> arguments) {
+        ProcessBuilder processBuilder = new ProcessBuilder(command(executable, arguments));
+        prependExecutablePaths(processBuilder.environment(), executable);
+        return processBuilder;
+    }
+
+    private static void prependExecutablePaths(Map<String, String> environment, String executable) {
+        Set<String> paths = new LinkedHashSet<>();
+        File executableFile = new File(executable);
+        addPath(paths, executableFile.getParent());
+
+        if (isWindows()) {
+            addWindowsSessionManagerPath(paths, System.getenv("ProgramFiles"));
+            addWindowsSessionManagerPath(paths, System.getenv("ProgramFiles(x86)"));
+            addWindowsSessionManagerPath(paths, System.getenv("LocalAppData"));
+        } else {
+            addPath(paths, "/usr/local/bin");
+            addPath(paths, "/usr/local/sessionmanagerplugin/bin");
+            addPath(paths, "/opt/homebrew/bin");
+            addPath(paths, "/usr/bin");
+            addPath(paths, "/bin");
+        }
+
+        String pathKey = environment.keySet().stream()
+                .filter(key -> "PATH".equalsIgnoreCase(key))
+                .findFirst()
+                .orElse("PATH");
+        String inheritedPath = environment.get(pathKey);
+        if (inheritedPath != null && !inheritedPath.isBlank()) {
+            for (String path : inheritedPath.split(java.util.regex.Pattern.quote(File.pathSeparator))) {
+                addPath(paths, path);
+            }
+        }
+        environment.put(pathKey, String.join(File.pathSeparator, paths));
+    }
+
+    private static void addWindowsSessionManagerPath(Set<String> paths, String basePath) {
+        if (basePath != null && !basePath.isBlank()) {
+            addPath(paths, basePath + "\\Amazon\\SessionManagerPlugin\\bin");
+        }
+    }
+
+    private static void addPath(Set<String> paths, String path) {
+        if (path != null && !path.isBlank()) {
+            paths.add(path.trim());
+        }
     }
 
     private static List<String> executableCandidates(String configuredPath) {
