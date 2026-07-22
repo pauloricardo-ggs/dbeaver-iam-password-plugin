@@ -483,7 +483,34 @@ document whenever possible.
 
 `Local Port ... is already in use`
 
-: Select another local port or stop the process currently listening on that port.
+: Update this plugin to the latest build. Earlier builds could leave an orphaned
+  `session-manager-plugin` process listening after a failed connection. Find and
+  stop the process once, then retry:
+
+  - macOS:
+
+    ```bash
+    lsof -nP -iTCP:<local-port> -sTCP:LISTEN
+    kill <pid>
+    ```
+
+  - Linux:
+
+    ```bash
+    sudo ss -ltnp 'sport = :<local-port>'
+    kill <pid>
+    ```
+
+  - Windows (PowerShell):
+
+    ```powershell
+    Get-NetTCPConnection -LocalPort <local-port> -State Listen |
+      Select-Object LocalAddress, LocalPort, OwningProcess
+    Stop-Process -Id <pid>
+    ```
+
+  If the listener is unrelated to `session-manager-plugin`, select another local
+  port instead of stopping it.
 
 `No ... was found with Name tag`
 

@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,8 +76,9 @@ final class SsmTunnelManager {
 
         long deadline = System.nanoTime() + START_TIMEOUT.toNanos();
         while (System.nanoTime() < deadline) {
+            tunnel.captureDescendants();
             if (!process.isAlive()) {
-                tunnel.awaitDrainers();
+                tunnel.close();
                 throw new SQLException("SSM port forwarding session exited before local port "
                         + key.localPort() + " became available." + tunnel.diagnostics());
             }
@@ -180,6 +182,7 @@ final class SsmTunnelManager {
 
     private static final class ManagedTunnel {
         private final Process process;
+        private final Map<Long, ProcessHandle> descendants = new HashMap<>();
         private final StringBuilder stdout = new StringBuilder();
         private final StringBuilder stderr = new StringBuilder();
         private Thread stdoutThread;
@@ -212,7 +215,18 @@ final class SsmTunnelManager {
             await(stderrThread);
         }
 
+        private void captureDescendants() {
+            process.descendants().forEach(handle -> descendants.put(handle.pid(), handle));
+        }
+
         private void close() {
+            captureDescendants();
+            List<ProcessHandle> childProcesses = new ArrayList<>(descendants.values());
+            for (ProcessHandle childProcess : childProcesses) {
+                if (childProcess.isAlive()) {
+                    childProcess.destroy();
+                }
+            }
             if (process.isAlive()) {
                 process.destroy();
                 try {
@@ -222,6 +236,11 @@ final class SsmTunnelManager {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     process.destroyForcibly();
+                }
+            }
+            for (ProcessHandle childProcess : childProcesses) {
+                if (childProcess.isAlive()) {
+                    childProcess.destroyForcibly();
                 }
             }
             awaitDrainers();
